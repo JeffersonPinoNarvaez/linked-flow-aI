@@ -1,0 +1,164 @@
+
+---
+
+## Archivo 2 — `.cursor/rules/postcraft-ai-rules.mdc`
+
+```md
+# Project Rules: linked flow AI
+
+You are working on linked flow AI, a bilingual AI-powered mini tool that rewrites user text into LinkedIn-ready content.
+
+Follow these rules strictly.
+
+---
+
+# Tech Standards
+
+- Use Next.js 15 with App Router.
+- Use TypeScript strict mode.
+- Use React Server Components by default.
+- Use Client Components only when interactivity is required.
+- Use Tailwind CSS and shadcn/ui.
+- Use Poppins as the main font.
+- Use Zod for all validation.
+- Keep components small, focused, and reusable.
+- Avoid unnecessary dependencies.
+- Prefer simple, readable code over clever abstractions.
+
+---
+
+# Security Rules
+
+- Never expose OPENAI_API_KEY to the client.
+- All OpenAI calls must happen server-side only.
+- Validate all incoming API payloads with Zod.
+- Reject requests with invalid, empty, or oversized text.
+- Do not store user-submitted text.
+- Do not log full user text in production.
+- Do not store personal data.
+- Do not use cookies unless strictly necessary.
+- Add rate limiting before calling OpenAI.
+- Return safe error messages to the client.
+- Never leak stack traces, API responses, tokens, or internal errors.
+
+---
+
+# OpenAI Usage Rules
+
+- Use a dedicated lib/openai.ts service.
+- Keep prompts controlled and deterministic.
+- Do not allow the model to invent achievements, numbers, employers, certifications, or claims.
+- Preserve the original meaning of the user text.
+- Output must match the selected language.
+- Output must match the selected tone.
+- Use low-to-medium temperature.
+- Set reasonable max tokens.
+- Never call OpenAI if validation fails.
+- Never call OpenAI if rate limit fails.
+
+---
+
+# Rate Limit Rules
+
+- Enforce max 10 rewrites per IP per day.
+- Enforce 30 seconds cooldown between requests per IP.
+- Use Upstash Redis or another server-side rate limit provider.
+- Prevent duplicate frontend submissions.
+- Disable submit button while request is pending.
+- Avoid repeated requests for identical unchanged text.
+
+---
+
+# UX Rules
+
+- The app must work in Spanish and English.
+- All labels, buttons, errors, modals, and helper texts must be translated.
+- The user must accept legal terms before generating.
+- The submit button must be disabled until:
+  - text is valid
+  - terms are accepted
+  - no request is pending
+
+- Show clear loading, success, and error states.
+- Provide a copy-to-clipboard button.
+- Provide a clear/reset button.
+- Use responsive design for mobile, tablet, and desktop.
+
+---
+
+# Legal UX Rules
+
+The footer must include modal links for:
+
+- Terms and Conditions
+- Privacy Policy
+- Responsible AI Use
+- Disclaimer
+- Contact
+
+Legal copy must clearly state:
+
+- AI-generated content may be inaccurate.
+- The user is responsible for reviewing before publishing.
+- The app does not guarantee job, business, or reputation outcomes.
+- Users must not submit confidential, private, sensitive, or third-party data.
+- User input may be processed by external AI providers.
+- The app is used at the user's own responsibility.
+
+---
+
+# Code Quality Rules
+
+- Use named exports unless a framework convention requires default exports.
+- Use descriptive variable and function names.
+- Avoid files longer than necessary.
+- Avoid duplicated logic.
+- Extract constants to lib/constants.ts.
+- Extract translations to lib/i18n.ts.
+- Extract validation schemas to lib/validations.ts.
+- Extract API logic to service files.
+- Keep API routes thin.
+- Use early returns.
+- Handle all async errors safely.
+
+---
+
+# Styling Rules
+
+- Use a modern premium SaaS aesthetic.
+- Use clean spacing.
+- Use rounded-2xl cards.
+- Use subtle borders and shadows.
+- Use accessible contrast.
+- Use responsive layouts.
+- Avoid visual clutter.
+- Do not use random colors outside the design system.
+
+---
+
+# Accessibility Rules
+
+- All form fields must have labels.
+- Modals must be keyboard accessible.
+- Buttons must have clear states.
+- Use semantic HTML.
+- Preserve focus states.
+- Use readable font sizes.
+- Avoid relying only on color to communicate errors.
+
+---
+
+# Performance Rules
+
+- Keep bundle size small.
+- Avoid unnecessary client components.
+- Avoid unnecessary re-renders.
+- Use server-side logic for API/security.
+- Do not import server-only code into client components.
+- Avoid heavy animations.
+
+---
+
+# Final Goal
+
+Every generated change must move the project toward a secure, modern, bilingual, production-ready MVP that can be deployed on Vercel and safely use OpenAI API without unnecessary token consumption.
