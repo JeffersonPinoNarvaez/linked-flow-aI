@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getClientIp, enforceRewriteRateLimit } from "@/lib/rate-limit";
 import { rewriteForLinkedIn } from "@/lib/openai";
 import { rewriteRequestSchema } from "@/lib/validations";
+import { incrementRewriteCount } from "@/lib/counters";
 
 export const runtime = "nodejs";
 
@@ -37,6 +38,7 @@ export async function POST(request: Request) {
     }
 
     const result = await rewriteForLinkedIn(parsed.data);
+    await incrementRewriteCount();
 
     return NextResponse.json({ result });
   } catch (error) {
