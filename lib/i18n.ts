@@ -34,6 +34,19 @@ export type Translation = {
   success: string;
   legalLinks: Record<LegalKey, string>;
   legalContent: Record<LegalKey, { title: string; paragraphs: string[] }>;
+  visitCounter: {
+    link: string;
+    title: string;
+    description: string;
+    totalVisits: string;
+    rewrittenPhrases: string;
+    loading: string;
+    error: string;
+  };
+  copyright: {
+    prefix: string;
+    linkLabel: string;
+  };
 };
 
 export const translations: Record<Language, Translation> = {
@@ -118,6 +131,20 @@ export const translations: Record<Language, Translation> = {
         ],
       },
     },
+    visitCounter: {
+      link: "Contador de visitas",
+      title: "Contador de visitas",
+      description:
+        "Un vistazo rápido a cuántas personas han pasado por aquí y cuántos textos ya recibieron tratamiento profesional.",
+      totalVisits: "Visitas totales al sitio",
+      rewrittenPhrases: "Frases reescritas",
+      loading: "Cargando números...",
+      error: "No pudimos cargar los contadores ahora mismo.",
+    },
+    copyright: {
+      prefix: "Creado por",
+      linkLabel: "Jefferson Pino",
+    },
   },
   en: {
     tagline: "Turn that embarrassing text into a professional LinkedIn post.",
@@ -199,6 +226,20 @@ export const translations: Record<Language, Translation> = {
           "If an output appears risky, inaccurate, sensitive, or inappropriate, do not publish it. Rewrite it, validate the information, and, when needed, consult a qualified person before using it.",
         ],
       },
+    },
+    visitCounter: {
+      link: "Visit counter",
+      title: "Visit counter",
+      description:
+        "A quick look at how many people have stopped by and how many texts have received the professional treatment.",
+      totalVisits: "Total site visits",
+      rewrittenPhrases: "Rewritten phrases",
+      loading: "Loading numbers...",
+      error: "We could not load the counters right now.",
+    },
+    copyright: {
+      prefix: "Created by",
+      linkLabel: "Jefferson Pino",
     },
   },
 };

@@ -9,7 +9,7 @@ import {
   Sparkles,
   Wand2,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { APP_NAME, MAX_TEXT_LENGTH, type Language, tones } from "@/lib/constants";
@@ -20,6 +20,7 @@ import { Checkbox } from "@/ui/checkbox";
 import { Select } from "@/ui/select";
 import { Textarea } from "@/ui/textarea";
 import { LegalModal } from "@/app/components/legal-modal";
+import { VisitCounterModal } from "@/app/components/visit-counter-modal";
 
 const formSchema = rewriteRequestSchema.extend({
   acceptedTerms: z.boolean().refine((value) => value),
@@ -33,12 +34,21 @@ type RewriteResponse = {
   error?: string;
 };
 
+type SiteCounters = {
+  totalVisits: number;
+  rewrittenPhrases: number;
+};
+
 export function PostCraftApp() {
   const [result, setResult] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
   const [activeLegalKey, setActiveLegalKey] = useState<LegalKey | null>(null);
+  const [visitCounterOpen, setVisitCounterOpen] = useState(false);
+  const [siteCounters, setSiteCounters] = useState<SiteCounters | null>(null);
+  const [countersLoading, setCountersLoading] = useState(false);
+  const [countersError, setCountersError] = useState(false);
   const [lastSuccessfulRequestKey, setLastSuccessfulRequestKey] = useState("");
 
   const {
@@ -76,6 +86,68 @@ export function PostCraftApp() {
   const activeLegalContent = activeLegalKey
     ? t.legalContent[activeLegalKey]
     : null;
+  const numberFormatter = useMemo(
+    () => new Intl.NumberFormat(language === "es" ? "es" : "en"),
+    [language],
+  );
+
+  async function refreshCounters(showLoading = true) {
+    if (showLoading) {
+      setCountersLoading(true);
+    }
+
+    setCountersError(false);
+
+    try {
+      const response = await fetch("/api/counters", {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error("Counters request failed.");
+      }
+
+      const counters = (await response.json()) as SiteCounters;
+      setSiteCounters(counters);
+    } catch {
+      setCountersError(true);
+    } finally {
+      if (showLoading) {
+        setCountersLoading(false);
+      }
+    }
+  }
+
+  useEffect(() => {
+    const visitStorageKey = "linked-flow-visit-counted";
+
+    async function registerVisit() {
+      if (window.sessionStorage.getItem(visitStorageKey)) {
+        await refreshCounters(false);
+        return;
+      }
+
+      window.sessionStorage.setItem(visitStorageKey, "true");
+
+      try {
+        const response = await fetch("/api/counters", {
+          method: "POST",
+        });
+
+        if (!response.ok) {
+          throw new Error("Visit counter request failed.");
+        }
+
+        const counters = (await response.json()) as SiteCounters;
+        setSiteCounters(counters);
+        setCountersError(false);
+      } catch {
+        setCountersError(true);
+      }
+    }
+
+    void registerVisit();
+  }, []);
 
   async function onSubmit(values: FormValues) {
     setErrorMessage("");
@@ -124,6 +196,7 @@ export function PostCraftApp() {
       setResult(data.result);
       setStatusMessage(t.success);
       setLastSuccessfulRequestKey(currentRequestKey);
+      void refreshCounters(false);
     } catch {
       setErrorMessage(t.errors.generic);
     }
@@ -319,7 +392,20 @@ export function PostCraftApp() {
       </main>
 
       <footer className="mx-auto flex w-full max-w-6xl flex-col gap-4 border-t border-slate-200 px-5 py-6 text-sm text-slate-600 sm:px-8 md:flex-row md:items-center md:justify-between">
-        <p>{APP_NAME}</p>
+        <div className="space-y-1">
+          <p>{APP_NAME}</p>
+          <p>
+            {t.copyright.prefix}{" "}
+            <a
+              className="font-semibold text-slate-700 underline-offset-4 hover:text-indigo-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              href="https://jeffersonpino.dev/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {t.copyright.linkLabel}
+            </a>
+          </p>
+        </div>
         <nav className="flex flex-wrap gap-x-4 gap-y-2" aria-label="Legal">
           {(Object.keys(t.legalLinks) as LegalKey[]).map((key) => (
             <button
@@ -331,6 +417,16 @@ export function PostCraftApp() {
               {t.legalLinks[key]}
             </button>
           ))}
+          <button
+            className="font-medium text-slate-600 underline-offset-4 hover:text-indigo-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            type="button"
+            onClick={() => {
+              setVisitCounterOpen(true);
+              void refreshCounters();
+            }}
+          >
+            {t.visitCounter.link}
+          </button>
         </nav>
       </footer>
 
@@ -342,6 +438,16 @@ export function PostCraftApp() {
           onClose={() => setActiveLegalKey(null)}
         />
       ) : null}
+
+      <VisitCounterModal
+        counters={siteCounters}
+        error={countersError}
+        formatter={numberFormatter}
+        labels={t.visitCounter}
+        loading={countersLoading}
+        open={visitCounterOpen}
+        onClose={() => setVisitCounterOpen(false)}
+      />
     </div>
   );
 }
